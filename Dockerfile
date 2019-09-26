@@ -1,5 +1,6 @@
 # Need devel version cause we need /usr/include/cudnn.h 
 # for compiling libctc_decoder_with_kenlm.so
+# for japanese analysis 
 FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 
 
@@ -225,3 +226,38 @@ RUN rm -rf kenlm \
 
 # Done
 WORKDIR /DeepSpeech
+
+# for japanese 
+RUN apt-get install -y --no-install-recommends wget emacs vim git curl file patch
+RUN apt-get install -y language-pack-ja-base language-pack-ja
+
+# env setup
+RUN locale-gen ja_JP.UTF-8
+ENV LANG ja_JP.UTF-8
+ENV LC_ALL ja_JP.UTF-8
+RUN echo "export LANG=ja_JP.UTF-8" >> ~/.bashrc
+RUN apt-get install -y time
+
+# MeCab
+WORKDIR /opt
+RUN git clone https://github.com/taku910/mecab.git
+WORKDIR /opt/mecab/mecab
+RUN ./configure --enable-utf8-only && make && make check && make install && ldconfig
+# ipaddic
+WORKDIR /opt/mecab/mecab-ipadic
+RUN ./configure --with-charset=utf8 && make && make install
+# neologd
+WORKDIR /opt
+RUN git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git
+WORKDIR /opt/mecab-ipadic-neologd
+RUN ./bin/install-mecab-ipadic-neologd -n -y
+
+# python
+RUN pip3 --no-cache-dir install mecab-python3==0.7
+
+# Ruby
+RUN apt-get install ruby -y
+
+# work space
+WORKDIR /work/data
+WORKDIR /data
