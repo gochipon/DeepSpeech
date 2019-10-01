@@ -253,7 +253,7 @@ WORKDIR /opt/mecab-ipadic-neologd
 RUN ./bin/install-mecab-ipadic-neologd -n -y
 
 # python
-RUN pip3 --no-cache-dir install mecab-python3==0.7
+RUN pip3 --no-cache-dir install mecab-python3==0.7 mojimoji
 
 # Ruby
 RUN apt-get install ruby -y
